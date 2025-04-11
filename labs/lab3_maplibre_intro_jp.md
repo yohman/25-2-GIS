@@ -121,3 +121,103 @@ html, body {
 ---
 
 次回は、地図上に**マーカー**や**ジオJSONデータ**を追加して、よりインタラクティブな地図を作っていきます！
+
+---
+
+## 🧠 チャレンジ（応用課題）
+
+以下の応用課題に挑戦して、地図をもっとカスタマイズしてみましょう！
+
+---
+
+### 🔄 1. 表示位置とポップアップのカスタマイズ
+
+- 地図の中心 (`center`) を自分の好きな場所に変更してみましょう
+- ポップアップ (`popup`) のテキストも自由に書き換えてください
+
+```javascript
+.setLngLat([経度, 緯度])
+.setHTML("<h3>場所の名前</h3><p>ここに説明文を入れましょう。</p>")
+```
+
+---
+
+### 📍 2. 複数のマーカーを地図に追加
+
+以下のように複数の場所にマーカーとポップアップを追加してみましょう：
+
+```javascript
+const locations = [
+  { lng: 139.7671, lat: 35.6812, name: "東京駅" },
+  { lng: 135.7586, lat: 34.9855, name: "京都駅" },
+  { lng: 141.3545, lat: 43.0687, name: "札幌駅" }
+];
+
+locations.forEach(loc => {
+  new maplibregl.Marker()
+    .setLngLat([loc.lng, loc.lat])
+    .setPopup(
+      new maplibregl.Popup().setHTML(`<h3>${loc.name}</h3>`)
+    )
+    .addTo(map);
+});
+```
+
+---
+
+### 🌍 3. すべてのマーカーが見えるように地図を調整
+
+すべてのマーカーが見えるように `fitBounds()` を使ってみましょう：
+
+```javascript
+const bounds = new maplibregl.LngLatBounds();
+locations.forEach(loc => bounds.extend([loc.lng, loc.lat]));
+map.fitBounds(bounds, { padding: 50 });
+```
+
+---
+
+### 🛣️ 4. 2地点間に線（ルート）を描画してみよう
+
+以下のように、2地点の間に線（LineString）を描画してみましょう：
+
+```javascript
+map.on('load', () => {
+  map.addSource('route', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [139.7671, 35.6812], // 東京
+          [135.7586, 34.9855]  // 京都
+        ]
+      }
+    }
+  });
+
+  map.addLayer({
+    id: 'route-line',
+    type: 'line',
+    source: 'route',
+    paint: {
+      'line-color': '#ff0000',
+      'line-width': 4
+    }
+  });
+});
+```
+
+---
+
+### 💡 その他のおすすめチャレンジ
+
+- 地図にカスタムアイコンを使ってみよう（`Marker`に画像を指定）  
+- ボタンを押すと地図が他の場所にジャンプする機能をつけてみよう  
+- `style.css` を編集して、地図の下に自分のプロフィール情報を表示してみよう  
+- モバイル対応のレイアウトを試してみよう（`@media` を使う）  
+
+---
+
+チャレンジを自由に組み合わせて、オリジナルな地図ページを作ってみましょう！🌟
