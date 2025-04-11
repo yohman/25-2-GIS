@@ -90,3 +90,64 @@ Week01/
 
 ---
 
+
+---
+
+## 🔗 追加チャレンジ
+
+### 1. お気に入りのサイトにリンクを追加してみよう
+
+以下のように `<a>` タグを使うとリンクを作成できます：
+
+```html
+<p>私の好きなサイトは <a href="https://www.youtube.com" target="_blank">YouTube</a> です。</p>
+```
+
+- `href` 属性でリンク先URLを指定します  
+- `target="_blank"` を追加すると、新しいタブで開きます  
+
+---
+
+### 2. 地図を埋め込んでみよう（Google マップ）
+
+学校や好きな場所の地図をページに表示するには、Googleマップの埋め込みコードを使います：
+
+1. [Google マップ](https://www.google.co.jp/maps) にアクセス  
+2. 場所を検索して、メニューから **「地図を共有または埋め込む」** を選ぶ  
+3. 「地図を埋め込む」タブの `<iframe>` コードをコピーして、HTMLに貼り付けます
+
+例：
+
+```html
+<iframe src="https://www.google.com/maps/embed?..." width="300" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+```
+
+---
+
+### 3. 背景色や文字色を変えてみよう（CSS）
+
+HTMLの中にスタイルを追加して、見た目を変えることができます：
+
+```html
+<body style="background-color: lightblue; color: darkblue;">
+```
+
+- `background-color` で背景色
+- `color` で文字の色が変えられます
+
+---
+
+### 4. 箇条書きで趣味を紹介してみよう
+
+```html
+<h2>私の趣味</h2>
+<ul>
+  <li>サッカー</li>
+  <li>プログラミング</li>
+  <li>アニメ鑑賞</li>
+</ul>
+```
+
+---
+
+たくさん試して、自分らしいページを作ってみましょう！🌟
