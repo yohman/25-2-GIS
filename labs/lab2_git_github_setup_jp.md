@@ -54,18 +54,33 @@ git config --global user.email "GitHubに登録したメールアドレス"
 
 ---
 
-## 📦 ステップ4: リポジトリをクローンする
 
-GitHubの `gis` リポジトリページで **「Code」→「HTTPS」** のURLをコピー  
-VS Codeのターミナルで以下を入力：
+---
+
+## 📦 ステップ4: リポジトリをクローンする（VS Codeの方法）
+
+### ✅ 推奨方法：VS Code の「コマンドパレット」を使う
+
+1. VS Code のウィンドウを開いた状態で  
+   **`Command + Shift + P`（Mac）または `Ctrl + Shift + P`（Windows）** を押す  
+2. 「Git: Clone」を検索して選択  
+3. GitHubの `gis` リポジトリページから「Code」→「HTTPS」URLをコピーし、貼り付ける  
+4. 「どこに保存するか」を聞かれるので、好きなフォルダを選ぶ  
+5. クローンが完了したら、「Open in New Window?」と聞かれたら「はい」を選択
+
+これで `gis` リポジトリがローカルにダウンロードされ、新しいVS Codeウィンドウで開きます。
+
+---
+
+### 💡 代替方法：ターミナルからクローン（オプション）
+
+以下のコマンドでもクローン可能です：
 
 ```bash
 git clone https://github.com/your-username/gis.git
 ```
 
-※ `your-username` は自分のGitHubユーザー名に置き換えてください。
-
----
+`your-username` を自分のGitHubユーザー名に置き換えてください。
 
 ## 📁 ステップ5: Week01フォルダを追加する
 
