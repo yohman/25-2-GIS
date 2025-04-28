@@ -94,19 +94,56 @@ html, body {
 
 ---
 
-## 🗺️ ステップ5: ベースマップの変更
+## 🗺️ ステップ5: ベースマップを国土地理院タイルに変更しよう！
 
-`style: "URL"` を変更することで、ベースマップのデザインを変えられます。
+これまで使っていたMapLibreデモスタイル（`https://demotiles.maplibre.org/style.json`）の代わりに、国土地理院（GSI）の標準地図タイルを使ってみましょう。
 
-いくつかの例：
+`index.html` のJavaScript内、`new maplibregl.Map({...})` の `style` の指定を以下のように変更します。
 
-- MapLibre公式スタイル（デフォルト）  
-  `https://demotiles.maplibre.org/style.json`
+変更前：
 
-- Maptiler（要APIキー）  
-  `https://api.maptiler.com/maps/streets/style.json?key=あなたのAPIキー`
+```javascript
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [139.7671, 35.6812],
+  zoom: 12
+});
+```
 
-- OpenStreetMap系タイルを自作スタイルに組み込むことも可能
+変更後：
+
+```javascript
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    "version": 8,
+    "sources": {
+      "gsi-std": {
+        "type": "raster",
+        "tiles": [
+          "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
+        ],
+        "tileSize": 256,
+        "attribution": "© 国土地理院"
+      }
+    },
+    "layers": [
+      {
+        "id": "gsi-std-layer",
+        "type": "raster",
+        "source": "gsi-std",
+        "minzoom": 0,
+        "maxzoom": 18
+      }
+    ]
+  },
+  center: [139.7671, 35.6812],
+  zoom: 12
+});
+```
+
+これで国土地理院の標準地図タイルを使った地図が表示されるようになります。
 
 ---
 
@@ -120,9 +157,6 @@ html, body {
 
 ---
 
-次回は、地図上に**マーカー**や**ジオJSONデータ**を追加して、よりインタラクティブな地図を作っていきます！
-
----
 
 ## 🧠 チャレンジ（応用課題）
 
