@@ -109,7 +109,7 @@ const map = new maplibregl.Map({
   center: [139.7671, 35.6812],
   zoom: 12
 });
-```
+``` 
 
 変更後：
 
