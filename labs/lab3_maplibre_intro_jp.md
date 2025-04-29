@@ -44,13 +44,13 @@ Week03/
       container: 'map',
       style: 'https://demotiles.maplibre.org/style.json', // ベースマップ
       center: [139.7671, 35.6812], // 東京駅 (経度, 緯度)
-      zoom: 12
+      zoom: 1
     });
 
     // ポップアップ（吹き出し）を追加
     const popup = new maplibregl.Popup({ offset: 25 })
       .setLngLat([139.7671, 35.6812])
-      .setHTML("<h3>東京駅</h3><p>ここが東京駅です！</p>")
+      .setHTML("<h3>Hello world!</h3><p>Greetings from Japan!🇯🇵</p>")
       .addTo(map);
   </script>
 </body>

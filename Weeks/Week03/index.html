@@ -11,40 +11,17 @@
 
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
-
     const map = new maplibregl.Map({
-    container: 'map', // HTML container id
-    style: {
-        "version": 8,
-        "sources": {
-        "gsi-std": {
-            "type": "raster",
-            "tiles": [
-            "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png"
-            ],
-            "tileSize": 256,
-            "attribution": "© 国土地理院"
-        }
-        },
-        "layers": [
-        {
-            "id": "gsi-std-layer",
-            "type": "raster",
-            "source": "gsi-std",
-            "minzoom": 0,
-            "maxzoom": 18
-        }
-        ]
-    },
-    center: [139.7671, 35.6812], // example: Tokyo Station
-    zoom: 12
+      container: 'map',
+      style: 'https://demotiles.maplibre.org/style.json', // ベースマップ
+      center: [139.7671, 35.6812], // 東京駅 (経度, 緯度)
+      zoom: 1
     });
-
 
     // ポップアップ（吹き出し）を追加
     const popup = new maplibregl.Popup({ offset: 25 })
       .setLngLat([139.7671, 35.6812])
-      .setHTML("<h3>東京駅</h3><p>ここが東京駅です！</p>")
+      .setHTML("<h3>Hello world!</h3><p>Greetings from Japan!🇯🇵</p>")
       .addTo(map);
   </script>
 </body>
