@@ -11,12 +11,33 @@
 
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: 'https://demotiles.maplibre.org/style.json', // ベースマップ
-      center: [139.7671, 35.6812], // 東京駅 (経度, 緯度)
-      zoom: 1
-    });
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    "version": 8,
+    "sources": {
+      "gsi-std": {
+        "type": "raster",
+        "tiles": [
+          "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+        ],
+        "tileSize": 256,
+        "attribution": "© 国土地理院"
+      }
+    },
+    "layers": [
+      {
+        "id": "gsi-std-layer",
+        "type": "raster",
+        "source": "gsi-std",
+        "minzoom": 0,
+        "maxzoom": 18
+      }
+    ]
+  },
+  center: [139.7671, 35.6812],
+  zoom: 12
+});
 
     // ポップアップ（吹き出し）を追加
     const popup = new maplibregl.Popup({ offset: 25 })
