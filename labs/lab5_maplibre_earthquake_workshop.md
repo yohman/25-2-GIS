@@ -55,7 +55,53 @@
 
 ## 2. USGS地震データを使ってリアルタイム地震情報を可視化
 
+### USGSのGeoJSONフィードとは？
+
+* 米国地質調査所（USGS）は、世界中の地震情報をGeoJSON形式で公開しています。
+* 各地震は1つの「Feature」として構成され、位置情報（geometry）と詳細情報（properties）を含みます。
+
+以下はデータの一例です（抜粋）：
+
+```json
+{
+  "type": "Feature",
+  "properties": {
+    "mag": 6.1,
+    "place": "72 km SSE of Luganville, Vanuatu",
+    "time": 1715585959240,
+    "title": "M 6.1 - 72 km SSE of Luganville"
+  },
+  "geometry": {
+    "type": "Point",
+    "coordinates": [167.2764, -16.8291, 10.0] // 経度, 緯度, 深さ
+  },
+  "id": "us7000kgyv"
+}
+```
+
+#### よく使うフィールドの意味
+
+* `properties.mag`: マグニチュード（例：6.1）
+* `properties.place`: 地震発生場所の説明（例："SSE of Luganville"）
+* `properties.time`: 発生時刻（Unix時間）
+* `geometry.coordinates`: `[経度, 緯度, 深さ]`
+
+MapLibreでは次のように使います：
+
+```javascript
+const coords = e.features[0].geometry.coordinates;
+const props = e.features[0].properties;
+
+popup.setHTML(`<strong>${props.place}</strong><br>Magnitude: ${props.mag}`);
+```
+
 ### ステップ1：circleレイヤーで地震を表示する（固定サイズ）
+
+このステップでは、地震データをGeoJSON形式で読み込み、すべての地震に対して固定サイズの赤い円を表示します。MapLibreの`circle`レイヤーは、シンプルな丸印でポイントデータを表現するためによく使われます。
+
+* `circle-radius`: 円の半径を指定します（ここでは固定で6ピクセル）
+* `circle-color`: 円の色（赤）
+* `circle-opacity`: 不透明度（0.7 = 少し透過）
 
 ```javascript
 map.on('load', () => {
@@ -114,6 +160,13 @@ map.on('load', () => {
 ---
 
 ### ステップ3：ポップアップ（ホバーで情報表示）を追加
+
+このステップでは、マウスを地震ポイントの上に乗せたとき（`mouseenter`）に、詳細情報を表示するポップアップを出し、マウスが離れたとき（`mouseleave`）にポップアップを非表示にします。
+
+* `map.on('mouseenter', ...)`：レイヤー上にマウスが来たらイベント発生
+* `map.on('mouseleave', ...)`：マウスがレイヤーから離れたときにイベント発生
+* `Popup().setLngLat().setHTML().addTo(map)`：指定位置に吹き出しを表示
+* `popup.remove()`：ポップアップを閉じる
 
 ```javascript
 let popup;
