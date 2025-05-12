@@ -6,6 +6,64 @@
 
 ## 1. HTMLと地図の基本構造
 
+このセクションでは、地図を表示するためのHTMLの基本的な構成について説明します。
+
+* `<!DOCTYPE html>`：HTML5文書であることを宣言します。
+* `<html> ... </html>`：HTML文書全体を囲むタグです。
+* `<head>`：タイトルやCSS、JavaScriptなど、文書のメタ情報を定義します。
+
+  * `<meta charset="utf-8">`：文字コードをUTF-8に指定します。
+  * `<title>`：ブラウザのタブに表示されるタイトルです。
+  * `<link>`：MapLibreのCSSファイルを読み込むタグです。
+  * `<style>`：地図の大きさを画面いっぱいに表示するためのCSSを記述します。
+* `<body>`：ブラウザに表示される本体部分です。
+
+  * `<div id="map">`：このdivの中に地図が表示されます。
+  * `<script>`：MapLibre GL JSのライブラリを読み込み、地図を表示するためのJavaScriptを記述します。
+
+以下はそのHTMLコードです：
+
+### MapLibreの初期化コードの解説
+
+```javascript
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'google-tiles': {
+        type: 'raster',
+        tiles: [
+          'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+        ],
+        tileSize: 256
+      }
+    },
+    layers: [
+      {
+        id: 'google-tiles-layer',
+        type: 'raster',
+        source: 'google-tiles',
+        minzoom: 0,
+        maxzoom: 19
+      }
+    ]
+  },
+  center: [139.7671, 35.6812],
+  zoom: 2
+});
+```
+
+* `container: 'map'`：地図を表示するHTMLの要素ID（ここでは`<div id="map">`）を指定。
+* `style`：地図のスタイルを定義するオブジェクト。
+
+  * `sources`：地図タイルの情報を指定。Googleの衛星画像タイル（`lyrs=y`）を使っています。
+  * `layers`：表示するレイヤーを設定。ここではラスタ画像（衛星写真）をそのまま表示。
+* `center`：地図の初期中心座標。例では東京駅（139.7671, 35.6812）。
+* `zoom`：初期のズームレベル。2は全体表示に近い。
+
+この設定により、MapLibreを使ってGoogleのサテライト画像をベースマップとして表示することができます。
+
 ```html
 <!DOCTYPE html>
 <html>
