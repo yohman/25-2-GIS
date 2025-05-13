@@ -1,5 +1,5 @@
 
-# Lab Week 4: GitHub Pages を使って Web 地図を公開しよう
+# Lab 4: GitHub Pages を使って Web 地図を公開しよう
 
 このラボでは、GitHub Pages を使って、自分の作成した Web 地図（Week3）をインターネット上で公開します。公開されたURLをクラスのPadletに投稿して共有します。
 
@@ -33,10 +33,7 @@
 
 1. 以下のPadletリンクにアクセス：
    - [https://padlet.com/yohda/gis](https://padlet.com/yohda/gis)
+1. 「Lab 4: GitHub Pages」の項目のコメントして投稿
 2. 投稿に含める内容：
-   - 自分のWeek3の地図が公開されている **URL**
+   - 自分のWeek3、もしくはWeek4の地図が公開されている **URL**
    - 簡単なコメント（例：「MapLibreを使って東京駅を中心にした地図を作成しました」など）
-
----
-
-このステップを終えると、自分の作ったWeb地図が誰でも見られる「作品」になります！
