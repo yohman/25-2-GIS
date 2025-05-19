@@ -45,36 +45,6 @@ let allBikeTheftData = null;
 map.on('load', () => {
 
 
-map.addSource('bike', {
-  type: 'geojson',
-  data: 'chibike.geojson',
-  cluster: true,
-  clusterMaxZoom: 14,
-  clusterRadius: 50
-});
-
-map.addLayer({
-  id: 'clusters',
-  type: 'circle',
-  source: 'bike',
-  filter: ['has', 'point_count'],
-  paint: {
-    'circle-color': '#51bbd6',
-    'circle-radius': ['step', ['get', 'point_count'], 20, 10, 30, 50, 40]
-  }
-});
-
-map.addLayer({
-  id: 'cluster-count',
-  type: 'symbol',
-  source: 'bike',
-  filter: ['has', 'point_count'],
-  layout: {
-    'text-field': '{point_count}',
-    'text-size': 12
-  }
-});
-
 
 
 

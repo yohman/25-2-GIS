@@ -1,4 +1,6 @@
-# Lab 5: 地図上でバッファを作って件数を数えよう
+# Lab 6: 地図上でバッファを作って件数を数えよう
+
+![alt text](lab6.png)
 
 まずは Visual Studio Code を開き、先週までのプロジェクトと同じ場所に `week05` というフォルダを作成しましょう。
 このフォルダに今回の `index.html` と `chibike.geojson` を保存して開発を進めます。
