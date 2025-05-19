@@ -5,9 +5,9 @@
 まずは Visual Studio Code を開き、先週までのプロジェクトと同じ場所に `week05` というフォルダを作成しましょう。
 このフォルダに今回の `index.html` と `chibike.geojson` を保存して開発を進めます。
 
-このラボでは、**Turf.js**という地理解析ライブラリを使って、地図上で「バッファ」（ある地点からの一定距離範囲）を描き、その範囲内に含まれるポイント（自転車盗難）をカウントする分析を行います。
+このラボでは、**Turf.js**という地理解析ライブラリ（[Turf.jsのウェブサイト](https://turfjs.org/)、[GitHubリポジトリ](https://github.com/Turfjs/turf)）を使って、地図上で「バッファ」（ある地点からの一定距離範囲）を描き、その範囲内に含まれるポイント（自転車盗難）をカウントする分析を行います。
 
-Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測定、重なり判定、統計処理など）を行うためのライブラリです。このラボでは、Turfの `circle()` 関数と `booleanPointInPolygon()` 関数を使って、バッファ分析の基本を体験します。
+Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測定、重なり判定、統計処理など）を行うためのライブラリです。このラボでは、Turfの `circle()` 関数（https://turfjs.org/docs/api/circle）と `booleanPointInPolygon()` 関数（https://turfjs.org/docs/api/booleanPointInPolygon）を使って、バッファ分析の基本を体験します。
 
 具体的には、千葉県の自転車盗難データを地図に表示し、地図上でクリックした場所の半径1km以内にある盗難件数を表示するアプリを作成します。
 
@@ -23,43 +23,43 @@ Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Chiba Bike Theft Analysis</title>
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { width: 100%; height: 100vh; }
-  </style>
+	<meta charset="utf-8">
+	<title>Chiba Bike Theft Analysis</title>
+	<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+	<style>
+		body { margin: 0; padding: 0; }
+		#map { width: 100%; height: 100vh; }
+	</style>
 </head>
 <body>
 <div id="map"></div>
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 <script>
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: {
-      version: 8,
-      sources: {
-        'google-tiles': {
-          type: 'raster',
-          tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
-          tileSize: 256
-        }
-      },
-      layers: [
-        {
-          id: 'google-tiles-layer',
-          type: 'raster',
-          source: 'google-tiles',
-          minzoom: 0,
-          maxzoom: 19
-        }
-      ]
-    },
-    center: [139.7671, 35.6812],
-    zoom: 2
-  });
+	const map = new maplibregl.Map({
+		container: 'map',
+		style: {
+			version: 8,
+			sources: {
+				'google-tiles': {
+					type: 'raster',
+					tiles: ['https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'],
+					tileSize: 256
+				}
+			},
+			layers: [
+				{
+					id: 'google-tiles-layer',
+					type: 'raster',
+					source: 'google-tiles',
+					minzoom: 0,
+					maxzoom: 19
+				}
+			]
+		},
+		center: [139.7671, 35.6812],
+		zoom: 2
+	});
 </script>
 </body>
 </html>
@@ -79,33 +79,33 @@ Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測
 let allBikeTheftData = null;
 
 map.on('load', () => {
-  map.addSource('bike', {
-    type: 'geojson',
-    data: 'chibike.geojson'
-  });
+	map.addSource('bike', {
+		type: 'geojson',
+		data: 'chibike.geojson'
+	});
 
-  map.addLayer({
-    id: 'bike-layer',
-    type: 'circle',
-    source: 'bike',
-    paint: {
-      'circle-radius': 4,
-      'circle-color': '#ff0000',
-      'circle-stroke-color': '#ffffff',
-      'circle-stroke-width': 1,
-      'circle-opacity': 0.7
-    }
-  });
+	map.addLayer({
+		id: 'bike-layer',
+		type: 'circle',
+		source: 'bike',
+		paint: {
+			'circle-radius': 4,
+			'circle-color': '#ff0000',
+			'circle-stroke-color': '#ffffff',
+			'circle-stroke-width': 1,
+			'circle-opacity': 0.7
+		}
+	});
 
-  fetch('chibike.geojson')
-    .then(response => response.json())
-    .then(data => {
-      allBikeTheftData = data;
-      if (data && data.features.length > 0) {
-        const bounds = turf.bbox(data);
-        map.fitBounds(bounds, { padding: 50 });
-      }
-    });
+	fetch('chibike.geojson')
+		.then(response => response.json())
+		.then(data => {
+			allBikeTheftData = data;
+			if (data && data.features.length > 0) {
+				const bounds = turf.bbox(data);
+				map.fitBounds(bounds, { padding: 50 });
+			}
+		});
 });
 ```
 
@@ -122,38 +122,38 @@ map.on('load', () => {
 
 ```javascript
 map.addSource('circle-source', {
-  type: 'geojson',
-  data: { type: 'FeatureCollection', features: [] }
+	type: 'geojson',
+	data: { type: 'FeatureCollection', features: [] }
 });
 
 map.addLayer({
-  id: 'circle-layer',
-  type: 'fill',
-  source: 'circle-source',
-  paint: {
-    'fill-color': '#007cbf',
-    'fill-opacity': 0.4
-  }
+	id: 'circle-layer',
+	type: 'fill',
+	source: 'circle-source',
+	paint: {
+		'fill-color': '#007cbf',
+		'fill-opacity': 0.4
+	}
 });
 
 map.addLayer({
-  id: 'circle-outline-layer',
-  type: 'line',
-  source: 'circle-source',
-  paint: {
-    'line-color': '#ffffff',
-    'line-width': 2
-  }
+	id: 'circle-outline-layer',
+	type: 'line',
+	source: 'circle-source',
+	paint: {
+		'line-color': '#ffffff',
+		'line-width': 2
+	}
 });
 
 map.on('click', (e) => {
-  const center = [e.lngLat.lng, e.lngLat.lat];
-  const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
-  map.getSource('circle-source').setData(circle);
-  const bounds = turf.bbox(circle);
-  map.fitBounds(bounds, { padding: 50 });
+	const center = [e.lngLat.lng, e.lngLat.lat];
+	const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
+	map.getSource('circle-source').setData(circle);
+	const bounds = turf.bbox(circle);
+	map.fitBounds(bounds, { padding: 50 });
 
-  // ステップ4に続く処理
+	// ステップ4に続く処理
 });
 ```
 
@@ -171,22 +171,22 @@ map.on('click', (e) => {
 let popup = null;
 
 map.on('click', (e) => {
-  const center = [e.lngLat.lng, e.lngLat.lat];
-  const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
-  map.getSource('circle-source').setData(circle);
+	const center = [e.lngLat.lng, e.lngLat.lat];
+	const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
+	map.getSource('circle-source').setData(circle);
 
-  let count = 0;
-  allBikeTheftData.features.forEach(f => {
-    if (f.geometry.type === 'Point') {
-      if (turf.booleanPointInPolygon(f, circle)) count++;
-    }
-  });
+	let count = 0;
+	allBikeTheftData.features.forEach(f => {
+		if (f.geometry.type === 'Point') {
+			if (turf.booleanPointInPolygon(f, circle)) count++;
+		}
+	});
 
-  if (popup) popup.remove();
-  popup = new maplibregl.Popup()
-    .setLngLat(e.lngLat)
-    .setHTML(`<h3>1km以内の盗難件数</h3><p>${count} 件</p>`)
-    .addTo(map);
+	if (popup) popup.remove();
+	popup = new maplibregl.Popup()
+		.setLngLat(e.lngLat)
+		.setHTML(`<h3>1km以内の盗難件数</h3><p>${count} 件</p>`)
+		.addTo(map);
 });
 ```
 
@@ -203,10 +203,10 @@ map.on('click', (e) => {
 ```javascript
 'bike-layer' の paint に以下を追加：
 'circle-color': [
-  'match', ['get', '施錠関係'],
-  '施錠した', '#008000',  // 鍵あり → 緑
-  '施錠せず', '#ff0000', // 鍵なし → 赤
-  '#888888'             // その他 → グレー
+	'match', ['get', '施錠関係'],
+	'施錠した', '#008000',  // 鍵あり → 緑
+	'施錠せず', '#ff0000', // 鍵なし → 赤
+	'#888888'             // その他 → グレー
 ],
 ```
 
