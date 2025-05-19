@@ -1,10 +1,17 @@
-# Lab 5: Click-to-Count Bike Theft in Chiba
+# Lab 5: 地図上でバッファを作って件数を数えよう
 
-このラボでは、MapLibreとTurf.jsを使って、千葉県の自転車盗難データを地図に表示し、地図上でクリックした場所の半径1km以内にある盗難件数を表示するアプリを作成します。
+まずは Visual Studio Code を開き、先週までのプロジェクトと同じ場所に `week05` というフォルダを作成しましょう。
+このフォルダに今回の `index.html` と `chibike.geojson` を保存して開発を進めます。
+
+このラボでは、**Turf.js**という地理解析ライブラリを使って、地図上で「バッファ」（ある地点からの一定距離範囲）を描き、その範囲内に含まれるポイント（自転車盗難）をカウントする分析を行います。
+
+Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測定、重なり判定、統計処理など）を行うためのライブラリです。このラボでは、Turfの `circle()` 関数と `booleanPointInPolygon()` 関数を使って、バッファ分析の基本を体験します。
+
+具体的には、千葉県の自転車盗難データを地図に表示し、地図上でクリックした場所の半径1km以内にある盗難件数を表示するアプリを作成します。
 
 ---
 
-## ✅ ステップ1：MapLibre地図を作成し、Turf.jsを読み込む
+## ステップ1：MapLibre地図を作成し、Turf.jsを読み込む
 
 このステップでは、MapLibreを使って地図のベース（Googleタイル）を表示し、空間演算用のTurf.jsを読み込みます。地図の表示は `#map` 要素内に行われ、中心とズームは東京駅に初期設定しています。
 
@@ -58,7 +65,7 @@
 
 ---
 
-## ✅ ステップ2：GeoJSONデータを読み込み、地図全体にフィット
+## ステップ2：GeoJSONデータを読み込み、地図全体にフィット
 
 このステップでは、`chibike.geojson` を読み込み、自転車盗難のデータポイントを赤い円でマップに表示します。さらに、Turf.jsの `bbox()` 関数を使って、データの全体範囲にズームします。
 
@@ -82,6 +89,8 @@ map.on('load', () => {
     paint: {
       'circle-radius': 4,
       'circle-color': '#ff0000',
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1,
       'circle-opacity': 0.7
     }
   });
@@ -100,7 +109,7 @@ map.on('load', () => {
 
 ---
 
-## ✅ ステップ3：クリックして1km円を描画・ズーム
+## ステップ3：クリックして1km円を描画・ズーム
 
 ユーザーが地図をクリックすると、その地点を中心に半径1kmの円を描画します。`turf.circle()` を使ってGeoJSON形式のポリゴンを生成し、地図に表示します。さらに、その円の範囲にズームします。
 
@@ -148,7 +157,7 @@ map.on('click', (e) => {
 
 ---
 
-## ✅ ステップ4：円内の盗難件数をカウントし、ポップアップで表示
+## ステップ4：円内の盗難件数をカウントし、ポップアップで表示
 
 このステップでは、描画された円の内部に含まれる自転車盗難データポイントの数を `turf.booleanPointInPolygon()` を使って数え、MapLibreの `Popup` で表示します。
 
@@ -183,4 +192,91 @@ map.on('click', (e) => {
 
 このラボを通じて、Turf.jsとMapLibreを使った簡単な空間集計（spatial query）の流れが体験できます。
 
+---
+
+## 発展課題（チャレンジ）
+
+### 1. カテゴリによる色分け（例：鍵あり/鍵なし）
+
+```javascript
+'bike-layer' の paint に以下を追加：
+'circle-color': [
+  'match', ['get', 'lock_status'],
+  'locked', '#008000',  // 鍵あり → 緑
+  'unlocked', '#ff0000', // 鍵なし → 赤
+  '#888888'             // その他 → グレー
+]
+```
+
+### 2. マーカークラスタリングの導入
+
+```javascript
+map.addSource('bike', {
+  type: 'geojson',
+  data: 'chibike.geojson',
+  cluster: true,
+  clusterMaxZoom: 14,
+  clusterRadius: 50
+});
+
+map.addLayer({
+  id: 'clusters',
+  type: 'circle',
+  source: 'bike',
+  filter: ['has', 'point_count'],
+  paint: {
+    'circle-color': '#51bbd6',
+    'circle-radius': ['step', ['get', 'point_count'], 20, 10, 30, 50, 40]
+  }
+});
+
+map.addLayer({
+  id: 'cluster-count',
+  type: 'symbol',
+  source: 'bike',
+  filter: ['has', 'point_count'],
+  layout: {
+    'text-field': '{point_count}',
+    'text-size': 12
+  }
+});
+```
+
+### 3. 情報パネルに範囲内のポイント情報を表示
+
+```javascript
+// map.on('click') 内の count を集計し、info パネルに表示
+const infoPanel = document.getElementById('info');
+infoPanel.innerHTML = `<strong>この円の中:</strong><br>盗難件数: ${count} 件`;
+```
+
+```html
+<!-- HTMLにパネル追加 -->
+<div id="info" style="position:absolute;top:10px;right:10px;background:white;padding:10px;border-radius:4px;z-index:1;"></div>
+```
+
+### 4. 半径を変更できるUIを追加
+
+```html
+<input type="range" id="radius" min="0.1" max="5" step="0.1" value="1">
+<label for="radius">半径 (km)</label>
+```
+
+```javascript
+// 半径の値を取得してクリック時に使用
+const radiusInput = document.getElementById('radius');
+const radius = parseFloat(radiusInput.value);
+const circle = turf.circle(center, radius, { steps: 64, units: 'kilometers' });
+```
+
+上記を組み合わせて、自分のテーマにあわせたインタラクティブなマップを拡張していきましょう。
+
 必要に応じて、半径変更やフィルター付きのUIを追加する発展課題に取り組んでみてください。
+
+---
+
+## 提出手順
+
+1. `week05` フォルダの内容を GitHub にコミット
+2. GitHub Pages で公開設定（前回と同様）
+3. 公開された URL をクラスの Padlet に投稿
