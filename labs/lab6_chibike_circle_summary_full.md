@@ -7,7 +7,7 @@
 
 このラボでは、**Turf.js**という地理解析ライブラリ（[Turf.jsのウェブサイト](https://turfjs.org/)、[GitHubリポジトリ](https://github.com/Turfjs/turf)）を使って、地図上で「バッファ」（ある地点からの一定距離範囲）を描き、その範囲内に含まれるポイント（自転車盗難）をカウントする分析を行います。
 
-Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測定、重なり判定、統計処理など）を行うためのライブラリです。このラボでは、Turfの `circle()` 関数（https://turfjs.org/docs/api/circle）と `booleanPointInPolygon()` 関数（https://turfjs.org/docs/api/booleanPointInPolygon）を使って、バッファ分析の基本を体験します。
+Turf.jsは、JavaScript上でジオメトリの操作や空間分析（距離測定、重なり判定、統計処理など）を行うためのライブラリです。このラボでは、Turfの `circle()` 関数 https://turfjs.org/docs/api/circle と `booleanPointInPolygon()` 関数 https://turfjs.org/docs/api/booleanPointInPolygon を使って、バッファ分析の基本を体験します。
 
 具体的には、千葉県の自転車盗難データを地図に表示し、地図上でクリックした場所の半径1km以内にある盗難件数を表示するアプリを作成します。
 
