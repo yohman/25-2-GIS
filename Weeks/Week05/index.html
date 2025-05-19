@@ -43,7 +43,47 @@
 let allBikeTheftData = null;
 
 map.on('load', () => {
-  map.addSource('bike', {
+
+
+map.addSource('bike', {
+  type: 'geojson',
+  data: 'chibike.geojson',
+  cluster: true,
+  clusterMaxZoom: 14,
+  clusterRadius: 50
+});
+
+map.addLayer({
+  id: 'clusters',
+  type: 'circle',
+  source: 'bike',
+  filter: ['has', 'point_count'],
+  paint: {
+    'circle-color': '#51bbd6',
+    'circle-radius': ['step', ['get', 'point_count'], 20, 10, 30, 50, 40]
+  }
+});
+
+map.addLayer({
+  id: 'cluster-count',
+  type: 'symbol',
+  source: 'bike',
+  filter: ['has', 'point_count'],
+  layout: {
+    'text-field': '{point_count}',
+    'text-size': 12
+  }
+});
+
+
+
+
+
+
+
+
+
+    map.addSource('bike', {
     type: 'geojson',
     data: 'chibike.geojson'
   });
@@ -53,8 +93,15 @@ map.on('load', () => {
     type: 'circle',
     source: 'bike',
     paint: {
-      'circle-radius': 8,
-      'circle-color': '#ff0000',
+      'circle-radius': 4,
+'circle-color': [
+  'match', ['get', '施錠関係'],
+  '施錠した', '#008000',  // 鍵あり → 緑
+  '施錠せず', '#ff0000', // 鍵なし → 赤
+  '#888888'             // その他 → グレー
+],
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1,
       'circle-opacity': 0.7
     }
   });
@@ -69,8 +116,7 @@ map.on('load', () => {
       }
     });
 
-
-    map.addSource('circle-source', {
+map.addSource('circle-source', {
   type: 'geojson',
   data: { type: 'FeatureCollection', features: [] }
 });
@@ -94,17 +140,12 @@ map.addLayer({
     'line-width': 2
   }
 });
-
-
 let popup = null;
 
 map.on('click', (e) => {
   const center = [e.lngLat.lng, e.lngLat.lat];
   const circle = turf.circle(center, 1, { steps: 64, units: 'kilometers' });
   map.getSource('circle-source').setData(circle);
-  const bounds = turf.bbox(circle);
-  map.fitBounds(bounds, { padding: 50 });
-
 
   let count = 0;
   allBikeTheftData.features.forEach(f => {
@@ -123,9 +164,8 @@ map.on('click', (e) => {
 
 
 
+
 });
-
-
 
 
 

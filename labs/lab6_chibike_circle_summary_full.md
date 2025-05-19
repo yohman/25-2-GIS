@@ -201,48 +201,15 @@ map.on('click', (e) => {
 ```javascript
 'bike-layer' の paint に以下を追加：
 'circle-color': [
-  'match', ['get', 'lock_status'],
-  'locked', '#008000',  // 鍵あり → 緑
-  'unlocked', '#ff0000', // 鍵なし → 赤
+  'match', ['get', '施錠関係'],
+  '施錠した', '#008000',  // 鍵あり → 緑
+  '施錠せず', '#ff0000', // 鍵なし → 赤
   '#888888'             // その他 → グレー
-]
+],
 ```
 
-### 2. マーカークラスタリングの導入
 
-```javascript
-map.addSource('bike', {
-  type: 'geojson',
-  data: 'chibike.geojson',
-  cluster: true,
-  clusterMaxZoom: 14,
-  clusterRadius: 50
-});
-
-map.addLayer({
-  id: 'clusters',
-  type: 'circle',
-  source: 'bike',
-  filter: ['has', 'point_count'],
-  paint: {
-    'circle-color': '#51bbd6',
-    'circle-radius': ['step', ['get', 'point_count'], 20, 10, 30, 50, 40]
-  }
-});
-
-map.addLayer({
-  id: 'cluster-count',
-  type: 'symbol',
-  source: 'bike',
-  filter: ['has', 'point_count'],
-  layout: {
-    'text-field': '{point_count}',
-    'text-size': 12
-  }
-});
-```
-
-### 3. 情報パネルに範囲内のポイント情報を表示
+### 2. 情報パネルに範囲内のポイント情報を表示
 
 ```javascript
 // map.on('click') 内の count を集計し、info パネルに表示
@@ -255,23 +222,8 @@ infoPanel.innerHTML = `<strong>この円の中:</strong><br>盗難件数: ${coun
 <div id="info" style="position:absolute;top:10px;right:10px;background:white;padding:10px;border-radius:4px;z-index:1;"></div>
 ```
 
-### 4. 半径を変更できるUIを追加
-
-```html
-<input type="range" id="radius" min="0.1" max="5" step="0.1" value="1">
-<label for="radius">半径 (km)</label>
-```
-
-```javascript
-// 半径の値を取得してクリック時に使用
-const radiusInput = document.getElementById('radius');
-const radius = parseFloat(radiusInput.value);
-const circle = turf.circle(center, radius, { steps: 64, units: 'kilometers' });
-```
-
-上記を組み合わせて、自分のテーマにあわせたインタラクティブなマップを拡張していきましょう。
-
-必要に応じて、半径変更やフィルター付きのUIを追加する発展課題に取り組んでみてください。
+上記のコードを参考にしながら、自分のマップに合った独自のカスタマイズを考えて実装してみましょう。
+色、ポップアップ、インフォパネルなど、アイデア次第でさまざまな表現が可能です！
 
 ---
 
