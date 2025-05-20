@@ -120,6 +120,8 @@ map.on('load', () => {
 * `map.fitBounds(...)`：円のバウンディングボックスをもとに、地図をその範囲にズームします。
 * `circle-layer` は塗りつぶし、`circle-outline-layer` は白い2ピクセルの外枠です。
 
+**このコードは map.on('load', ...) の中で実行してください**
+
 ```javascript
 map.addSource('circle-source', {
 	type: 'geojson',
@@ -200,8 +202,8 @@ map.on('click', (e) => {
 
 ### 1. カテゴリによる色分け（例：鍵あり/鍵なし）
 
+```bike-layer``` の paint に以下を追加：
 ```javascript
-'bike-layer' の paint に以下を追加：
 'circle-color': [
 	'match', ['get', '施錠関係'],
 	'施錠した', '#008000',  // 鍵あり → 緑
