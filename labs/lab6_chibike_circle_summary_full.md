@@ -3,7 +3,7 @@
 ![alt text](lab6.png)
 
 まずは Visual Studio Code を開き、先週までのプロジェクトと同じ場所に `week05` というフォルダを作成しましょう。
-このフォルダに今回の `index.html` と `chibike.geojson` を保存して開発を進めます。
+このフォルダに今回の `index.html` と `chibike.geojson` を保存して開発を進めます。`chibike.geojson` は、[https://github.com/yohman/25-2-GIS/blob/main/Weeks/Week05/chibike.geojson](https://github.com/yohman/25-2-GIS/blob/main/Weeks/Week05/chibike.geojson) からダウンロードしてください（ページ右上のダウンロードアイコンをクリック）。
 
 このラボでは、**Turf.js**という地理解析ライブラリ（[Turf.jsのウェブサイト](https://turfjs.org/)、[GitHubリポジトリ](https://github.com/Turfjs/turf)）を使って、地図上で「バッファ」（ある地点からの一定距離範囲）を描き、その範囲内に含まれるポイント（自転車盗難）をカウントする分析を行います。
 
