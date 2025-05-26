@@ -22,28 +22,40 @@
 ```html
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8" />
-  <title>MapLibre Basemap Starter</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-  </style>
+	<meta charset="utf-8" />
+	<title>MapLibre Basemap Starter</title>
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+	</style>
 </head>
+
 <body>
-  <div id="map"></div>
-  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-  <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // ← ここを書き換える
-      center: [139.7671, 35.6812],
-      zoom: 10
-    });
-  </script>
+	<div id="map"></div>
+	<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+	<script>
+		const map = new maplibregl.Map({
+			container: 'map',
+			style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // ← ここを書き換える
+			center: [139.7671, 35.6812],
+			zoom: 10
+		});
+	</script>
 </body>
+
 </html>
 ```
 
@@ -419,35 +431,6 @@ const map = new maplibregl.Map({
 });
 ```
 
-### Google Terrain
-
-```javascript
-const map = new maplibregl.Map({
-	container: 'map',
-	style: {
-		version: 8,
-		sources: {
-			'google-terrain': {
-				type: 'raster',
-				tiles: [
-					'https://mt1.google.com/vt/lyrs=t&x={x}&y={y}&z={z}'
-				],
-				tileSize: 256,
-				attribution: '&copy; Google'
-			}
-		},
-		layers: [
-			{
-				id: 'google-terrain-layer',
-				type: 'raster',
-				source: 'google-terrain'
-			}
-		]
-	},
-	center: [139.7671, 35.6812],
-	zoom: 10
-});
-```
 
 ### Google Satellite Hybrid
 
