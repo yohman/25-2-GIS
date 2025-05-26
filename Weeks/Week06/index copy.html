@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Chiba Bike Theft Analysis</title>
+	<link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#map {
+			width: 100%;
+			height: 100vh;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+	<div id="radius-control" style="position:absolute; top:10px; left:10px; background:white; padding:10px; z-index:1; display: none;">
+		<label for="radius">半径(km): </label>
+		<input type="range" id="radius" min="0.1" max="5" step="0.1" value="1" />
+		<span id="radius-label">1</span>
+	</div>
+	<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+	<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+	<script>
+		// SECTION: Map Initialization
+		const map = new maplibregl.Map({
+			container: 'map',
+			style: {
+				version: 8,
+				sources: {
+					'base-tiles': { 
+						type: 'raster',
+						tiles: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
+						tileSize: 256
+					}
+				},
+				layers: [{
+					id: 'base-tiles-layer', 
+					type: 'raster',
+					source: 'base-tiles',
+					minzoom: 0,
+					maxzoom: 19
+				}]
+			},
+			center: [139.7671, 35.6812],
+			zoom: 2
+		});
+
+		// SECTION: Global Variables & DOM Elements
+		let allBikeTheftData = null;
+		let popup = null;
+		let lastClickedLngLat = null; // Stores the LngLat of the last map click
+
+		const radiusInput = document.getElementById('radius');
+		const radiusLabel = document.getElementById('radius-label');
+		let currentRadius = parseFloat(radiusInput.value); // Initial radius from slider
+
+		// SECTION: Helper Function to Update Circle and Popup
+		function updateCircleAndPopup(centerLngLat, radiusKm) {
+			if (!allBikeTheftData || !centerLngLat) {
+				// Ensure data is loaded and a center point is available
+				return;
+			}
+
+			const centerCoords = [centerLngLat.lng, centerLngLat.lat];
+			const circleGeoJSON = turf.circle(centerCoords, radiusKm, { steps: 64, units: 'kilometers' });
+			map.getSource('circle-source').setData(circleGeoJSON);
+
+			let count = 0;
+			allBikeTheftData.features.forEach(feature => {
+				if (feature.geometry.type === 'Point' && turf.booleanPointInPolygon(feature, circleGeoJSON)) {
+					count++;
+				}
+			});
+
+			if (popup) popup.remove();
+			popup = new maplibregl.Popup()
+				.setLngLat(centerLngLat)
+				.setHTML(`<h3>${radiusKm}km以内の盗難件数</h3><p>${count} 件</p>`)
+				.addTo(map);
+			
+			document.getElementById('radius-control').style.display = 'block'; // Show radius control
+		}
+
+		// SECTION: Map Load Event Handler
+		map.on('load', () => {
+			// SUB-SECTION: Load Bike Theft Data and Add Layer
+			map.addSource('bike', {
+				type: 'geojson',
+				data: 'chibike.geojson'
+			});
+
+			map.addLayer({
+				id: 'bike-layer',
+				type: 'circle',
+				source: 'bike',
+				paint: {
+					'circle-radius': 4,
+					'circle-color': '#ff0000',
+					'circle-stroke-color': '#ffffff',
+					'circle-stroke-width': 1,
+					'circle-opacity': 0.7
+				}
+			});
+
+			fetch('chibike.geojson')
+				.then(response => response.json())
+				.then(data => {
+					allBikeTheftData = data;
+					if (data && data.features.length > 0) {
+						const bounds = turf.bbox(data);
+						map.fitBounds(bounds, { padding: 50 });
+					}
+					// If a click happened before data loaded, and radius was changed, update now.
+					if (lastClickedLngLat) {
+					    updateCircleAndPopup(lastClickedLngLat, currentRadius);
+					}
+				});
+
+			// SUB-SECTION: Add Source and Layers for Interactive Circle
+			map.addSource('circle-source', {
+				type: 'geojson',
+				data: { type: 'FeatureCollection', features: [] } // Initial empty data
+			});
+
+			map.addLayer({
+				id: 'circle-layer',
+				type: 'fill',
+				source: 'circle-source',
+				paint: {
+					'fill-color': '#007cbf',
+					'fill-opacity': 0.4
+				}
+			});
+
+			map.addLayer({
+				id: 'circle-outline-layer',
+				type: 'line',
+				source: 'circle-source',
+				paint: {
+					'line-color': '#ffffff',
+					'line-width': 2
+				}
+			});
+
+			// SUB-SECTION: Radius Control Event Listener
+			radiusInput.addEventListener('input', () => {
+				currentRadius = parseFloat(radiusInput.value);
+				radiusLabel.textContent = currentRadius;
+				if (lastClickedLngLat) { // Only update if a point has been clicked
+					updateCircleAndPopup(lastClickedLngLat, currentRadius);
+				}
+			});
+
+			// SUB-SECTION: Map Click Event Listener
+			map.on('click', (e) => {
+				lastClickedLngLat = e.lngLat; // Store the clicked LngLat object
+				updateCircleAndPopup(lastClickedLngLat, currentRadius);
+			});
+		});
+	</script>
+</body>
+
+</html>

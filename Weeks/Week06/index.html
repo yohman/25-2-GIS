@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Dynamic Radius Circle</title>
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #slider-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 8px;
+      z-index: 1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="slider-container">
+    <label for="radiusRange">半径 (km): <span id="radiusLabel">1</span></label><br />
+    <input type="range" id="radiusRange" min="0.1" max="5" step="0.1" value="1">
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+  <script>
+    const center = [139.76, 35.68]; // 東京駅周辺
+    let radius = 1;
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://demotiles.maplibre.org/style.json',
+      center: center,
+      zoom: 11
+    });
+
+    let circle = turf.circle(center, radius, { steps: 64, units: 'kilometers' });
+
+    map.on('load', () => {
+      map.addSource('circle', {
+        type: 'geojson',
+        data: circle
+      });
+
+      map.addLayer({
+        id: 'circle-layer',
+        type: 'fill',
+        source: 'circle',
+        paint: {
+          'fill-color': '#007cbf',
+          'fill-opacity': 0.4
+        }
+      });
+    });
+
+    // Slider interaction
+    const radiusInput = document.getElementById('radiusRange');
+    const radiusLabel = document.getElementById('radiusLabel');
+
+    radiusInput.addEventListener('input', () => {
+      radius = parseFloat(radiusInput.value);
+      radiusLabel.textContent = radius;
+      const newCircle = turf.circle(center, radius, { steps: 64, units: 'kilometers' });
+      if (map.getSource('circle')) {
+        map.getSource('circle').setData(newCircle);
+      }
+    });
+  </script>
+</body>
+</html>
