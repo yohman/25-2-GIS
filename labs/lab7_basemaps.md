@@ -2,7 +2,7 @@
 
 ![alt text](<tiles thumbs/basemaps all.png>)
 
-
+➡︎ https://github.com/yohman/25-2-GIS/blob/main/labs/basemap.html
 
 このガイドでは、MapLibre GL JSで使用できるベースマップの種類と、その使い方（コード例）を紹介します。
 
