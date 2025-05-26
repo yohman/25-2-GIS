@@ -66,6 +66,17 @@
 
 CartoDBのPositronは軽量で視認性の高い背景スタイル。
 
+### コード例：
+
+```javascript
+const map = new maplibregl.Map({
+	container: 'map',
+	style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+	center: [139.7671, 35.6812],
+	zoom: 10
+});
+```
+
 ---
 
 ## 1-B. CartoDB Dark Matter（ダークモード対応）
