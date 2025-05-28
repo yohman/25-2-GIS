@@ -110,11 +110,6 @@
         <div id="sidebar">
             <h2>Basemap Library</h2>
             <p style="color: #e0e0e0; font-size: 0.9em;">日本で利用可能なタイル基盤地図とMapLibre GL JSのサンプルコードです。</p>
-            
-            <p style="color: #e0e0e0; font-size: 0.9em;">
-                <a href="https://github.com/yohman/25-2-GIS/blob/main/labs/lab7_basemaps.md" style="color: #8ab4f8; text-decoration: underline;" target="_blank">使い方はこちら ➡</a>
-            </p>
-            
             <div id="basemap-list">
                 <!-- Basemap cards will be injected here by JavaScript -->
             </div>
@@ -445,7 +440,7 @@
             zoom: currentInitialZoom,
             attributionControl: false // Disable the default attribution control
         });
-        
+
         map.once('idle', () => { // Set initial URL after map is fully loaded
             const center = map.getCenter();
             updateUrlParams(center.lat, center.lng, map.getZoom(), currentActiveBasemapId);
@@ -455,6 +450,7 @@
             const center = map.getCenter();
             updateUrlParams(center.lat, center.lng, map.getZoom(), currentActiveBasemapId);
         });
+        // Note: 'zoomend' is also covered by 'moveend' if it changes the center or zoom.
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
         map.addControl(new maplibregl.ScaleControl());
