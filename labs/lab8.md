@@ -1,38 +1,119 @@
-# Lab 8: 世界のコロプレスマップを作ってみよう
+Lab 8: Choropleth Map of the World using GDP
 
-このラボでは、世界地図のコロプレスマップ（Choropleth Map）を作成します。国ごとのポリゴンに属性情報（人口、政治体制など）を結びつけて、色分け表示を行います。
+このラボでは、世界の国ごとの属性（GDPなど）を使って、**階級区分地図（Choropleth Map）**を作成します。GeoJSON形式の世界地図ポリゴンと、国ごとの統計情報を結合して視覚化します。
 
-## Part 1: 世界ポリゴンの可視化と属性マップ作成
+⸻
 
-### ✅ ステップ 1: 国ポリゴン（GeoJSON）のダウンロード
+ステップ 1：GeoJSON形式の世界地図をダウンロード
 
-1. 以下のサイトから世界の国境データ（GeoJSON形式）をダウンロードします：
+**ポリゴン（行政区域）**は、地図上で色分けするための形の情報です。
+以下のリンクから世界の国境を含むGeoJSONをダウンロードします：
+	•	https://geojson.xyz/world.geo.json
 
-   * [https://geojson.xyz/](https://geojson.xyz/)
-   * `ne_110m_admin_0_countries.geojson`（もしくはより高解像度のもの）を選びます
+保存名：countries.geojson
 
-### ✅ ステップ 2: Kepler.glで可視化してみよう
+🔍 解説：
 
-1. [https://kepler.gl/](https://kepler.gl/) を開き、GeoJSONファイルをアップロード
-2. 「Add data」でポリゴンを読み込み、「Fill color」で属性を選択
-3. コロプレス表示が簡単にできます
+GeoJSONは地理データをJSON形式で表現したフォーマットです。各国の境界はFeatureオブジェクトとして格納されており、各国のコードや名前などの属性（properties）が含まれています。
 
-### ✅ ステップ 3: VSCodeでMapLibre地図を作成しよう
+⸻
 
-1. VSCodeで `lab8` フォルダを作成
-2. 以下のような `index.html` を作成：
+ステップ 2：国別の統計データをダウンロード
 
-```html
+以下のリンクから、各国のGDPなどの情報を含むCSVファイルをダウンロードします：
+	•	https://simplemaps.com/data/countries
+
+保存名：countries.csv
+
+🔍 解説：
+
+このデータには、iso2という2文字の国コード（例：JP、US、CN）を含む列があり、gdpなどの指標が含まれています。
+
+⸻
+
+ステップ 3：Google Colabを使ってデータを結合（Join）
+
+Google Colabを使って、countries.geojsonとcountries.csvをiso_a2とiso2で**結合（Join）**します。
+
+!pip install geopandas
+
+from google.colab import files
+uploaded = files.upload()  # 2ファイルをアップロード
+
+import geopandas as gpd
+import pandas as pd
+
+# GeoJSONとCSVの読み込み
+gdf = gpd.read_file("countries.geojson")
+df = pd.read_csv("countries.csv")
+
+# Join（結合）
+joined = gdf.merge(df, left_on='iso_a2', right_on='iso2', how='left')
+
+🔍 解説：
+	•	gpd.read_file() は空間データ（GeoJSON）を読み込みます。
+	•	merge() によって、共通する国コードをキーにして属性を結合します。
+	•	how='left' は、GeoJSONの全てのポリゴンを保持し、CSVのデータをマッチする部分にだけ付加します。
+
+⸻
+
+ステップ 4：ChoroplethをColab上で描画
+
+import matplotlib.pyplot as plt
+
+# GDP列を数値型にして、NaNを除外
+joined['gdp'] = pd.to_numeric(joined['gdp'], errors='coerce')
+plot_data = joined.dropna(subset=['gdp'])
+
+# Choropleth描画
+fig, ax = plt.subplots(figsize=(15, 8))
+plot_data.plot(
+    column='gdp',
+    cmap='OrRd',
+    linewidth=0.5,
+    ax=ax,
+    edgecolor='0.8',
+    legend=True,
+    legend_kwds={'label': "GDP by Country", 'orientation': "horizontal"}
+)
+ax.set_title("Choropleth Map of GDP by Country")
+ax.axis('off')
+plt.show()
+
+🔍 解説：
+	•	cmap は色の種類を表します。OrRdはオレンジ系のグラデーション。
+	•	column='gdp' によって色分けの対象列を指定。
+	•	dropna() によって、GDPの無い国を除外。
+
+⸻
+
+ステップ 5：GeoJSONでエクスポート
+
+output_file = "countries_joined.geojson"
+joined.to_file(output_file, driver='GeoJSON')
+
+files.download(output_file)
+
+これで、GDP情報付きのGeoJSONがダウンロードできます。
+
+⸻
+
+ステップ 6：MapLibreで地図に表示する
+
+VSCodeに lab08 フォルダを作成し、以下の2ファイルを用意します：
+	•	index.html
+	•	style.css
+
+index.html（CartoDB Positronをベースマップに使用）
+
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>World Choropleth</title>
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet">
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { width: 100vw; height: 100vh; }
-  </style>
+  <meta charset="utf-8" />
+  <title>Choropleth GDP Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div id="map"></div>
@@ -46,123 +127,53 @@ const map = new maplibregl.Map({
 });
 
 map.on('load', () => {
-  map.addSource('world', {
+  map.addSource('countries', {
     type: 'geojson',
-    data: 'ne_110m_admin_0_countries.geojson'
+    data: 'countries_joined.geojson'  // GDP付きのファイルを同じフォルダに置く
   });
 
   map.addLayer({
-    id: 'world-fill',
+    id: 'gdp-layer',
     type: 'fill',
-    source: 'world',
+    source: 'countries',
     paint: {
       'fill-color': [
-        'interpolate', ['linear'], ['get', 'POP_EST'],
-        1000000, '#fee5d9',
-        10000000, '#fcae91',
-        50000000, '#fb6a4a',
-        100000000, '#de2d26',
-        1000000000, '#a50f15'
+        'interpolate', ['linear'], ['get', 'gdp'],
+        1000, '#fee5d9',
+        10000, '#fcae91',
+        100000, '#fb6a4a',
+        1000000, '#de2d26',
+        10000000, '#a50f15'
       ],
-      'fill-opacity': 0.7
+      'fill-opacity': 0.8,
+      'fill-outline-color': '#ffffff'
     }
   });
 });
 </script>
 </body>
 </html>
-```
 
----
+style.css
 
-## Part 2: データを結合して新しいコロプレスを作ろう
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
 
-### ✅ ステップ 4: 世界の政治体制データを入手
 
-1. [https://ourworldindata.org/grapher/political-regime](https://ourworldindata.org/grapher/political-regime)
-2. データをCSVでダウンロードします（`country`, `Code`, `Year`, `Regime` など）
-3. 一つの年（例：2020年）だけを使ってデータをフィルタリングしておきましょう
+⸻
 
-### ✅ ステップ 5: 国コードでデータを結合する（Join）
+補足：
+	•	interpolate は値に応じて色をグラデーションする式です。
+	•	['get', 'gdp'] で、GeoJSON内のgdp属性を参照します。
+	•	より詳細なスタイル設定には、stepやmatchも使用可能です。
 
-#### 🔎 Joinとは？
+⸻
 
-異なるデータセット（この場合は地理データと属性データ）を、共通する「キー（識別子）」を使って結合する操作を「Join（ジョイン）」と呼びます。
-ここでは：
+おまけ課題（任意）
+	•	色分けの方式を変更してみよう（例：stepで分類別に）
+	•	gdp以外の指標（人口、面積など）で階級区分を作ってみよう
+	•	クリックすると国名とGDPをポップアップ表示する機能を追加してみよう
 
-* **GeoJSONの国ポリゴンデータ**には `ISO_A3` という3文字の国コードがあります。
-* **CSVの属性データ**には `Code` というフィールドがあり、同じく3文字国コードです。
+⸻
 
-この2つのフィールドを使って結合します。
-
-#### 🔧 PapaParseとは？
-
-PapaParseは、CSVファイルをJavaScriptで簡単に読み込むことができるオープンソースのライブラリです。
-CDN経由で読み込めば、クライアント側でCSVをオブジェクトとして扱うことができます。
-
-HTML内に以下を追加して使います：
-
-```html
-<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-```
-
-#### 🧪 実装コード：
-
-以下のコードを `map.on('load')` の中に追加します：
-
-```javascript
-Promise.all([
-  fetch('ne_110m_admin_0_countries.geojson').then(res => res.json()),
-  fetch('regime.csv')
-    .then(res => res.text())
-    .then(text => Papa.parse(text, { header: true }).data)
-]).then(([geojson, csvData]) => {
-  // 年が2020年のデータを抽出し、CodeをキーにRegime値を保存
-  const regimeMap = {};
-  csvData.forEach(row => {
-    if (row.Year === '2020') {
-      regimeMap[row.Code] = row.Regime;
-    }
-  });
-
-  // GeoJSONの各国フィーチャにRegime値を追加
-  geojson.features.forEach(f => {
-    f.properties.Regime = regimeMap[f.properties.ISO_A3];
-  });
-
-  // 地図に反映
-  map.addSource('world', {
-    type: 'geojson',
-    data: geojson
-  });
-
-  map.addLayer({
-    id: 'regime-fill',
-    type: 'fill',
-    source: 'world',
-    paint: {
-      'fill-color': [
-        'match', ['get', 'Regime'],
-        '1', '#e41a1c',  // Democracy
-        '2', '#377eb8',  // Flawed
-        '3', '#4daf4a',  // Hybrid
-        '4', '#984ea3',  // Authoritarian
-        '#cccccc'       // その他
-      ],
-      'fill-opacity': 0.8
-    }
-  });
-});
-```
-
-#### 💬 解説：
-
-* `Promise.all()` を使ってGeoJSONとCSVを同時に読み込み
-* `Papa.parse` でCSVをパース（読み込み）
-* `regimeMap` オブジェクトでCodeとRegimeを対応づけ
-* GeoJSONの各国に `.properties.Regime` を追加
-* `fill-color` を `match` によってカテゴリごとに色分け
-
----
-
-このラボでは、属性データと地理データの結合、色分け方法の選定、MapLibreによる実装まで、コロプレスマップの基本を学びました。次は、自分で興味のあるテーマを見つけて、可視化してみましょう！
+以上で、世界の国ごとの統計情報を使った基本的な階級区分地図の作成が完了です。
