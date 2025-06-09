@@ -1,3 +1,87 @@
+# Lab 8: Choropleth Map of the World using GDP
+
+このラボでは、世界の国ごとの属性（GDPや宗教など）を使って、**階級区分地図（Choropleth Map）**を作成します。
+
+---
+
+## ステップ 1：GeoJSON形式の世界地図をダウンロード
+
+以下のリンクから世界の国境を含むGeoJSONをダウンロードします：
+
+- https://geojson.xyz/world.geo.json
+
+保存名：`countries.geojson`
+
+---
+
+## ステップ 2：国別の統計データをダウンロード
+
+以下のリンクから、各国のGDPや宗教の情報を含むCSVファイルをダウンロードします：
+
+- https://simplemaps.com/data/countries
+
+保存名：`countries.csv`
+
+---
+
+## ステップ 3：Google Colabでデータを結合
+
+```python
+!pip install geopandas
+from google.colab import files
+uploaded = files.upload()
+
+import geopandas as gpd
+import pandas as pd
+
+gdf = gpd.read_file("countries.geojson")
+df = pd.read_csv("countries.csv")
+
+joined = gdf.merge(df, left_on="iso_a2", right_on="iso2", how="left")
+```
+
+---
+
+## ステップ 4：ChoroplethをColabで描画
+
+```python
+import matplotlib.pyplot as plt
+
+joined["gdp"] = pd.to_numeric(joined["gdp"], errors="coerce")
+plot_data = joined.dropna(subset=["gdp"])
+
+fig, ax = plt.subplots(figsize=(15, 8))
+plot_data.plot(
+		column="gdp",
+		cmap="OrRd",
+		linewidth=0.5,
+		ax=ax,
+		edgecolor="0.8",
+		legend=True,
+		legend_kwds={"label": "GDP by Country", "orientation": "horizontal"}
+)
+ax.set_title("Choropleth Map of GDP by Country")
+ax.axis("off")
+plt.show()
+```
+
+---
+
+## ステップ 5：GeoJSONとして保存
+
+```python
+output_file = "countries_joined.geojson"
+joined.to_file(output_file, driver="GeoJSON")
+files.download(output_file)
+```
+
+---
+
+## ステップ 6：MapLibreで表示する
+
+`lab08` フォルダを作り、以下の `index.html` を作成：
+
+```html
 <!DOCTYPE html>
 <html>
 	<head>
@@ -90,3 +174,8 @@
 		</script>
 	</body>
 </html>
+```
+
+---
+
+これで、GDPや宗教ごとの階級区分地図が完成です。
