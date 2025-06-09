@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>World Choropleth</title>
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet">
-    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { width: 100vw; height: 100vh; }
-  </style>
+  <meta charset="utf-8" />
+  <title>Choropleth GDP Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div id="map"></div>
@@ -22,49 +19,28 @@ const map = new maplibregl.Map({
 });
 
 map.on('load', () => {
-
-  Promise.all([
-  fetch('ne_110m_admin_0_countries.geojson').then(res => res.json()),
-  fetch('political-regime/political-regime.csv')
-    .then(res => res.text())
-    .then(text => Papa.parse(text, { header: true }).data)
-]).then(([geojson, csvData]) => {
-  // 年が2020年のデータを抽出し、CodeをキーにRegime値を保存
-  const regimeMap = {};
-  csvData.forEach(row => {
-    if (row.Year === '2020') {
-      regimeMap[row.Code] = row.Regime;
-    }
-  });
-
-  // GeoJSONの各国フィーチャにRegime値を追加
-  geojson.features.forEach(f => {
-    f.properties.Regime = regimeMap[f.properties.ISO_A3];
-  });
-
-  // 地図に反映
-  map.addSource('world', {
+  map.addSource('countries', {
     type: 'geojson',
-    data: geojson
+    data: 'countries_joined.geojson'
   });
 
   map.addLayer({
-    id: 'regime-fill',
+    id: 'gdp-layer',
     type: 'fill',
-    source: 'world',
+    source: 'countries',
     paint: {
       'fill-color': [
-        'match', ['get', 'Political regime'],
-        '1', '#e41a1c',  // Democracy
-        '2', '#377eb8',  // Flawed
-        '3', '#4daf4a',  // Hybrid
-        '4', '#984ea3',  // Authoritarian
-        '#ffffff'       // その他
+        'interpolate', ['linear'], ['get', 'gdp'],
+        1000, '#fee5d9',
+        10000, '#fcae91',
+        100000, '#fb6a4a',
+        1000000, '#de2d26',
+        10000000, '#a50f15'
       ],
-      'fill-opacity': 0.8
+      'fill-opacity': 0.8,
+      'fill-outline-color': '#ffffff'
     }
   });
-});
 });
 </script>
 </body>
