@@ -38,7 +38,7 @@
 
 ---
 
-## ステップ4：Google Colabでデータの結合
+## ステップ4：Google Colabでデータを読み込む
 
 ```python
 !pip install geopandas
@@ -53,27 +53,25 @@ gdf = gpd.read_file("tokyo_mesh.geojson")
 
 # 統計データ（txt）読み込み
 df = pd.read_csv("tblT001100S5339.txt", encoding="shift-jis", skiprows=[1])
-
-# 結合
-joined = gdf.merge(df, on="KEY_CODE", how="left")
-
-# 結合結果をファイルに出力
-joined.to_file("combined_cleaned.geojson", driver="GeoJSON")
-joined.to_csv("combined_cleaned.csv", index=False)
 ```
 
----
-
-## ステップ5：GeoJSONとの結合（Join）
-
-ここでは、ポリゴンデータ（GeoJSON）と統計データ（CSV）を結合します。`geopandas`ライブラリを使用し、共通のキー（`KEY_CODE`）を使って、それぞれのデータを紐付けます。
+## ステップ5：GeoJSONと統計データの結合
 
 ```python
-gdf = gpd.read_file("tokyo_mesh.geojson")
-joined = gdf.merge(combined, left_on="KEY_CODE", right_on="KEY_CODE", how="left")
+# Convert 'KEY_CODE' column to integer type in both dataframes
+gdf['KEY_CODE'] = gdf['KEY_CODE'].astype(int)
+combined['KEY_CODE'] = combined['KEY_CODE'].astype(int)
+
+# Join on KEY_CODE
+merged = gdf.merge(combined, on="KEY_CODE", how="left")
+
+# Save the joined GeoJSON
+merged.to_file("joined_output.geojson", driver="GeoJSON")
 ```
 
 ---
+
+
 
 ## ステップ6：合計人口フィールドで Choropleth を表示
 
@@ -82,20 +80,18 @@ joined = gdf.merge(combined, left_on="KEY_CODE", right_on="KEY_CODE", how="left"
 ```python
 import matplotlib.pyplot as plt
 
-joined["T001100001"] = pd.to_numeric(joined["T001100001"], errors="coerce")
-plot_data = joined.dropna(subset=["T001100001"])
+# Make the plot larger
+fig, ax = plt.subplots(1, 1, figsize=(15, 10))
 
-fig, ax = plt.subplots(figsize=(10, 10))
-plot_data.plot(
-  column="T001100001",
-  cmap="Blues",
-  linewidth=0.1,
-  edgecolor="gray",
-  legend=True,
-  legend_kwds={"label": "人口（人）", "orientation": "horizontal"},
-  ax=ax
-)
-ax.set_title("東京23区 1kmメッシュの人口（2020年国勢調査）")
+# Create a choropleth map
+merged.plot(column='T001100001', ax=ax, legend=True,
+            legend_kwds={'label': "Total Population",
+                         'orientation': "horizontal"})
+
+# Add a title (optional)
+ax.set_title('Choropleth Map of Total Population')
+
+# Display the plot
 plt.show()
 ```
 
@@ -106,7 +102,7 @@ plt.show()
 色分けされた地図データをGeoJSON形式でエクスポートします。このGeoJSONファイルは、MapLibreで表示するために使用されます。
 
 ```python
-joined.to_file("tokyo_population.geojson", driver="GeoJSON")
+merged.to_file("tokyo_population.geojson", driver="GeoJSON")
 files.download("tokyo_population.geojson")
 ```
 
@@ -119,53 +115,69 @@ files.download("tokyo_population.geojson")
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>Tokyo 1km Mesh Population Map</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <style>
-  body { margin: 0; padding: 0; }
-  #map { width: 100%; height: 100vh; }
-  </style>
-</head>
-<body>
-<div id="map"></div>
-<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-<script>
-const map = new maplibregl.Map({
-  container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center: [139.75, 35.68],
-  zoom: 9
-});
+	<head>
+		<meta charset="utf-8" />
+		<title>Tokyo 1km Mesh Population Map</title>
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+		<link
+			href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css"
+			rel="stylesheet"
+		/>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			#map {
+				width: 100%;
+				height: 100vh;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="map"></div>
+		<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+		<script>
+			const map = new maplibregl.Map({
+				container: 'map',
+				style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+				center: [139.75, 35.68],
+				zoom: 9
+			});
 
-map.on('load', () => {
-  map.addSource('tokyo', {
-  type: 'geojson',
-  data: 'tokyo_population.geojson'
-  });
+			map.on('load', () => {
+				map.addSource('tokyo', {
+					type: 'geojson',
+					data: 'tokyo_population.geojson'
+				});
 
-  map.addLayer({
-  id: 'population-layer',
-  type: 'fill',
-  source: 'tokyo',
-  paint: {
-    'fill-color': [
-    'interpolate', ['linear'], ['get', 'T001100001'],
-    0, '#f0f9e8',
-    500, '#bae4bc',
-    1000, '#7bccc4',
-    2000, '#2b8cbe',
-    5000, '#08589e'
-    ],
-    'fill-opacity': 0.75,
-    'fill-outline-color': '#ffffff'
-  }
-  });
-});
-</script>
-</body>
+				map.addLayer({
+					id: 'population-layer',
+					type: 'fill',
+					source: 'tokyo',
+					paint: {
+						'fill-color': [
+							'interpolate',
+							['linear'],
+							['get', 'T001100001'],
+							0,
+							'#f0f9e8',
+							500,
+							'#bae4bc',
+							1000,
+							'#7bccc4',
+							2000,
+							'#2b8cbe',
+							5000,
+							'#08589e'
+						],
+						'fill-opacity': 0.75,
+						'fill-outline-color': '#ffffff'
+					}
+				});
+			});
+		</script>
+	</body>
 </html>
 ```
 
