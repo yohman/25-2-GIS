@@ -15,20 +15,14 @@
 4. 世界測地系緯度経度・Shapefileを選び、**M5339（東京都区部）** をダウンロード
 
 ---
-
 ## ステップ2：ShapefileをGeoJSONに変換
 
-ダウンロードしたShapefile形式のポリゴンデータを、MapLibreで利用できるGeoJSON形式に変換します。Mapshaperを使うことで、簡単に変換できます。
+ダウンロードしたShapefile形式のポリゴンデータを、MapLibreで利用できるGeoJSON形式に変換します。Mapshaperを使うと、簡単に変換できます。
 
-1. [Mapshaper](https://mapshaper.org/) にアクセス
-2. ステップ1でダウンロードしたzipファイルをアップロード
-3. 右上の「Console」リンクをクリックし、以下のコマンドを入力してレイヤーをマージ（複数ファイルがある場合）：
-
-```
--o format=geojson
-```
-
-4. Exportして `tokyo_mesh.geojson` として保存
+1. [Mapshaper](https://mapshaper.org/) にアクセス  
+2. 前のステップでダウンロードしたzipファイルをアップロード  
+3. 右側の「Export」ボタンをクリックし、「GeoJSON」を選択  
+4. 出力ファイル名を「tokyo_mesh.geojson」に指定し、拡張子を .json から .geojson に変更してエクスポート
 
 ---
 
