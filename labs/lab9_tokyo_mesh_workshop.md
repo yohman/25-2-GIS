@@ -1,6 +1,6 @@
 
 # 1kmメッシュの統計データを地図に可視化する
-
+![alt text](tokyopop.png)
 このワークショップでは、e-Statから東京23区の1kmメッシュのポリゴンと統計データをダウンロードし、GeoJSONに変換してMapLibre上で階級区分図（Choropleth Map）として表示する方法を学びます。
 
 
@@ -72,6 +72,7 @@ df = pd.read_csv("tblT001100S5339.txt", encoding="shift-jis", skiprows=[1])
 > `tblT001100S5339.txt`の読み込み時に、`skiprows=[1]`を指定しているのは、最初の行がヘッダーではないためです。必要に応じて調整してください。
 
 ## ステップ5：GeoJSONと統計データの結合
+GeoJSONデータと統計データを結合します。ここでは、`KEY_CODE`という共通のキーを使って結合します。`KEY_CODE`は、メッシュの識別子であり、GeoJSONと統計データの両方に存在します。`merge`関数を使用して、これらのデータフレームを結合します。
 
 ```python
 # Convert 'KEY_CODE' column to integer type in both dataframes
