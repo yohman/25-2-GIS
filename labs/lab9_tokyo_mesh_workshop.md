@@ -64,14 +64,9 @@ combined['KEY_CODE'] = combined['KEY_CODE'].astype(int)
 
 # Join on KEY_CODE
 merged = gdf.merge(combined, on="KEY_CODE", how="left")
-
-# Save the joined GeoJSON
-merged.to_file("joined_output.geojson", driver="GeoJSON")
 ```
 
 ---
-
-
 
 ## ステップ6：合計人口フィールドで Choropleth を表示
 
@@ -145,36 +140,36 @@ files.download("tokyo_population.geojson")
 				zoom: 9
 			});
 
-			map.on('load', () => {
-				map.addSource('tokyo', {
-					type: 'geojson',
-					data: 'tokyo_population.geojson'
-				});
+            map.on('load', () => {
+                map.addSource('tokyo', {
+                    type: 'geojson',
+                    data: 'tokyo_population.geojson'
+                });
 
-				map.addLayer({
-					id: 'population-layer',
-					type: 'fill',
-					source: 'tokyo',
-					paint: {
-						'fill-color': [
-							'interpolate',
-							['linear'],
-							['get', 'T001100001'],
-							0,
-							'#f0f9e8',
-							500,
-							'#bae4bc',
-							1000,
-							'#7bccc4',
-							2000,
-							'#2b8cbe',
-							5000,
-							'#08589e'
-						],
-						'fill-opacity': 0.75,
-						'fill-outline-color': '#ffffff'
-					}
-				});
+                map.addLayer({
+                    id: 'population-layer',
+                    type: 'fill',
+                    source: 'tokyo',
+                    paint: {
+                        'fill-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'T001100001'],
+                            0,
+                            '#f0f9e8',
+                            5000,
+                            '#bae4bc',
+                            10000,
+                            '#7bccc4',
+                            15000,
+                            '#2b8cbe',
+                            20000,
+                            '#08589e'
+                        ],
+                        'fill-opacity': 0.75,
+                        'fill-outline-color': '#ffffff'
+                    }
+                });
 			});
 		</script>
 	</body>
