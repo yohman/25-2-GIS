@@ -135,41 +135,41 @@ files.download("tokyo_population.geojson")
 		<script>
 			const map = new maplibregl.Map({
 				container: 'map',
-				style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+				style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
 				center: [139.75, 35.68],
 				zoom: 9
 			});
 
-            map.on('load', () => {
-                map.addSource('tokyo', {
-                    type: 'geojson',
-                    data: 'tokyo_population.geojson'
-                });
+			map.on('load', () => {
+				map.addSource('tokyo', {
+					type: 'geojson',
+					data: 'tokyo_population.geojson'
+				});
 
-                map.addLayer({
-                    id: 'population-layer',
-                    type: 'fill',
-                    source: 'tokyo',
-                    paint: {
-                        'fill-color': [
-                            'interpolate',
-                            ['linear'],
-                            ['get', 'T001100001'],
-                            0,
-                            '#f0f9e8',
-                            5000,
-                            '#bae4bc',
-                            10000,
-                            '#7bccc4',
-                            15000,
-                            '#2b8cbe',
-                            20000,
-                            '#08589e'
-                        ],
-                        'fill-opacity': 0.75,
-                        'fill-outline-color': '#ffffff'
-                    }
-                });
+				map.addLayer({
+					id: 'population-layer',
+					type: 'fill',
+					source: 'tokyo',
+					paint: {
+						'fill-color': [
+							'interpolate',
+							['linear'],
+							['get', 'T001100001'],
+							0,
+							'#f0f9e8',
+							5000,
+							'#bae4bc',
+							10000,
+							'#7bccc4',
+							15000,
+							'#2b8cbe',
+							20000,
+							'#08589e'
+						],
+						'fill-opacity': 0.75,
+						'fill-outline-color': '#ffffff'
+					}
+				});
 			});
 		</script>
 	</body>
