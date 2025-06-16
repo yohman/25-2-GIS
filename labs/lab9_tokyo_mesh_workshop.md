@@ -1,0 +1,185 @@
+
+# ワークショップ：1kmメッシュの統計データを地図に可視化する
+
+このワークショップでは、e-Statから東京23区の1kmメッシュのポリゴンと統計データをダウンロードし、GeoJSONに変換してMapLibre上で階級区分図（Choropleth Map）として表示する方法を学びます。
+
+---
+
+## ステップ1：ポリゴンデータ（メッシュ境界）をダウンロード
+
+まず、地図の基本となるポリゴンデータ（メッシュの境界線）をe-Statからダウンロードします。このデータは、地図上に統計情報を表示するための区画を定義するために使用されます。
+
+1. [e-Stat](https://www.e-stat.go.jp/) にアクセス
+2. メニューから「地図」＞「境界データダウンロード」をクリック
+3. 「3次メッシュ（1kmメッシュ）」を選択
+4. 世界測地系緯度経度・Shapefileを選び、**M5339（東京都区部）** をダウンロード
+
+---
+
+## ステップ2：ShapefileをGeoJSONに変換
+
+ダウンロードしたShapefile形式のポリゴンデータを、MapLibreで利用できるGeoJSON形式に変換します。Mapshaperを使うことで、簡単に変換できます。
+
+1. [Mapshaper](https://mapshaper.org/) にアクセス
+2. ステップ1でダウンロードしたzipファイルをアップロード
+3. 右上の「Console」リンクをクリックし、以下のコマンドを入力してレイヤーをマージ（複数ファイルがある場合）：
+
+```
+-o format=geojson
+```
+
+4. Exportして `tokyo_mesh.geojson` として保存
+
+---
+
+## ステップ3：統計データ（人口など）をダウンロード
+
+次に、地図上に表示する統計データ（例：人口）をe-Statからダウンロードします。このデータは、各メッシュのポリゴンに対応する形で提供されており、地図の色分けに使用されます。
+
+1. [e-Stat](https://www.e-stat.go.jp/) にアクセス
+2. メニューから「地図」＞「統計データダウンロード」をクリック
+3. 「3次メッシュ（1kmメッシュ）」を選択
+4. 国勢調査（2020年）「人口及び世帯」のデータを選択
+5. **M5339（東京都区部）** を選び、ダウンロードして展開
+
+---
+
+## ステップ4：Google Colabでデータの結合
+
+```python
+!pip install geopandas
+from google.colab import files
+uploaded = files.upload()  # tokyo_mesh.geojson と tblT001100S5339.txt をアップロード
+
+import geopandas as gpd
+import pandas as pd
+
+# GeoJSON 読み込み
+gdf = gpd.read_file("tokyo_mesh.geojson")
+
+# 統計データ（txt）読み込み
+df = pd.read_csv("tblT001100S5339.txt", encoding="shift-jis", skiprows=[1])
+
+# 結合
+joined = gdf.merge(df, on="KEY_CODE", how="left")
+
+# 結合結果をファイルに出力
+joined.to_file("combined_cleaned.geojson", driver="GeoJSON")
+joined.to_csv("combined_cleaned.csv", index=False)
+```
+
+---
+
+## ステップ5：GeoJSONとの結合（Join）
+
+ここでは、ポリゴンデータ（GeoJSON）と統計データ（CSV）を結合します。`geopandas`ライブラリを使用し、共通のキー（`KEY_CODE`）を使って、それぞれのデータを紐付けます。
+
+```python
+gdf = gpd.read_file("tokyo_mesh.geojson")
+joined = gdf.merge(combined, left_on="KEY_CODE", right_on="KEY_CODE", how="left")
+```
+
+---
+
+## ステップ6：合計人口フィールドで Choropleth を表示
+
+結合されたデータを使って、人口に応じた色分け地図（Choropleth Map）を作成します。`matplotlib`ライブラリを使用し、人口データを色で表現し、地図上に表示します。
+
+```python
+import matplotlib.pyplot as plt
+
+joined["T001100001"] = pd.to_numeric(joined["T001100001"], errors="coerce")
+plot_data = joined.dropna(subset=["T001100001"])
+
+fig, ax = plt.subplots(figsize=(10, 10))
+plot_data.plot(
+  column="T001100001",
+  cmap="Blues",
+  linewidth=0.1,
+  edgecolor="gray",
+  legend=True,
+  legend_kwds={"label": "人口（人）", "orientation": "horizontal"},
+  ax=ax
+)
+ax.set_title("東京23区 1kmメッシュの人口（2020年国勢調査）")
+plt.show()
+```
+
+---
+
+## ステップ7：GeoJSONにエクスポート
+
+色分けされた地図データをGeoJSON形式でエクスポートします。このGeoJSONファイルは、MapLibreで表示するために使用されます。
+
+```python
+joined.to_file("tokyo_population.geojson", driver="GeoJSON")
+files.download("tokyo_population.geojson")
+```
+
+---
+
+## ステップ8：MapLibreで表示する
+
+最後に、エクスポートしたGeoJSONファイルをMapLibreで表示します。`index.html`ファイルを作成し、MapLibreの設定を記述することで、インタラクティブな地図として表示できます。
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Tokyo 1km Mesh Population Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+  body { margin: 0; padding: 0; }
+  #map { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+<script>
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  center: [139.75, 35.68],
+  zoom: 9
+});
+
+map.on('load', () => {
+  map.addSource('tokyo', {
+  type: 'geojson',
+  data: 'tokyo_population.geojson'
+  });
+
+  map.addLayer({
+  id: 'population-layer',
+  type: 'fill',
+  source: 'tokyo',
+  paint: {
+    'fill-color': [
+    'interpolate', ['linear'], ['get', 'T001100001'],
+    0, '#f0f9e8',
+    500, '#bae4bc',
+    1000, '#7bccc4',
+    2000, '#2b8cbe',
+    5000, '#08589e'
+    ],
+    'fill-opacity': 0.75,
+    'fill-outline-color': '#ffffff'
+  }
+  });
+});
+</script>
+</body>
+</html>
+```
+
+---
+
+## 応用課題（チャレンジ）
+
+- `fill-color`のブレークポイントを変更して、人口分布の見え方を工夫しよう
+- 他の変数（世帯数など）を使って色分けを試してみよう
+- ポップアップ機能をつけて、メッシュをクリックすると情報を表示するようにしよう
+
