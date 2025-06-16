@@ -1,18 +1,9 @@
 
-# ワークショップ：1kmメッシュの統計データを地図に可視化する
+# 1kmメッシュの統計データを地図に可視化する
 
 このワークショップでは、e-Statから東京23区の1kmメッシュのポリゴンと統計データをダウンロードし、GeoJSONに変換してMapLibre上で階級区分図（Choropleth Map）として表示する方法を学びます。
 
-## 目次
-- [ステップ1：ポリゴンデータ（メッシュ境界）をダウンロード](#ステップ1ポリゴンデータメッシュ境界をダウンロード)
-- [ステップ2：ShapefileをGeoJSONに変換](#ステップ2shapefileをgeojsonに変換)
-- [ステップ3：統計データ（人口など）をダウンロード](#ステップ3統計データ人口などをダウンロード)
-- [ステップ4：Google Colabでデータを読み込む](#ステップ4google-colabでデータを読み込む)
-- [ステップ5：GeoJSONと統計データの結合](#ステップ5geojsonと統計データの結合)
-- [ステップ6：合計人口フィールドで Choropleth を表示](#ステップ6合計人口フィールドで-choropleth-を表示)
-- [ステップ7：GeoJSONにエクスポート](#ステップ7geojsonにエクスポート)
-- [ステップ8：MapLibreで表示する](#ステップ8maplibreで表示する)
-- [応用課題（チャレンジ）](#応用課題チャレンジ)
+
 
 ---
 
@@ -54,7 +45,13 @@
 
 ## ステップ4：Google Colabでデータを読み込む
 
-新しいタブでGoogle Colabを開き、以下のコードを実行して必要なライブラリをインストールし、GeoJSONと統計データを読み込みます。
+新しいタブで[Google Colab](https://colab.research.google.com/)を開き、以下のコードを実行して必要なライブラリをインストールし、GeoJSON（tokyo_mesh.geojson）と統計データ（tblT001100S5339.txt）を読み込みます。
+
+> ⚠️ **注意！**  
+> Google Colabでは、ファイルをアップロードする必要があります。以下のコードを実行すると、ファイルをアップロードするためのダイアログが表示されます。
+>
+> ⚠️ **注意2！**  
+> アップロードするファイルは、`tokyo_mesh.geojson` と `tblT001100S5339.txt` の2つです。ファイル名が異なる場合は、コード内のファイル名を適宜変更してください。
 
 ```python
 !pip install geopandas
@@ -71,15 +68,18 @@ gdf = gpd.read_file("tokyo_mesh.geojson")
 df = pd.read_csv("tblT001100S5339.txt", encoding="shift-jis", skiprows=[1])
 ```
 
+> ⚠️ **注意！**  
+> `tblT001100S5339.txt`の読み込み時に、`skiprows=[1]`を指定しているのは、最初の行がヘッダーではないためです。必要に応じて調整してください。
+
 ## ステップ5：GeoJSONと統計データの結合
 
 ```python
 # Convert 'KEY_CODE' column to integer type in both dataframes
 gdf['KEY_CODE'] = gdf['KEY_CODE'].astype(int)
-combined['KEY_CODE'] = combined['KEY_CODE'].astype(int)
+df['KEY_CODE'] = df['KEY_CODE'].astype(int)
 
 # Join on KEY_CODE
-merged = gdf.merge(combined, on="KEY_CODE", how="left")
+merged = gdf.merge(df, on="KEY_CODE", how="left")
 ```
 
 ---
