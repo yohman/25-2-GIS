@@ -16,9 +16,16 @@ from collections import defaultdict
 # Change to data directory
 os.chdir('data')
 
+# Find Excel file dynamically
+excel_files = [f for f in os.listdir('.') if f.endswith('.xlsx') and not f.startswith('~')]
+if not excel_files:
+    print("ERROR: No Excel file found in data folder!")
+    exit(1)
+excel_file = excel_files[0]
+
 # Read Excel file for student names and dates
-print("Reading Excel file...")
-wb = openpyxl.load_workbook('ykawano_Jga004Exc04_20260525145952.xlsx')
+print(f"Reading Excel file: {excel_file}")
+wb = openpyxl.load_workbook(excel_file)
 ws = wb.active
 
 student_info = {}
@@ -90,6 +97,13 @@ for student_id, student_files in sorted(students.items()):
     except Exception as e:
         print(f"    Error reading {html_file}: {e}")
         continue
+    
+    # Clean any existing navigation (start fresh)
+    # Remove navigation divs that match our pattern
+    import re as regex
+    nav_pattern = r'<div style="position:fixed;top:20px;right:20px;z-index:9999;">.*?</div></div>'
+    content = regex.sub(nav_pattern, '', content, flags=regex.DOTALL)
+    print(f"    Cleaned old navigation from {html_file}")
     
     modified = False
     
@@ -217,11 +231,6 @@ for i, student in enumerate(students_with_html):
         with open(html_file, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
     except:
-        continue
-    
-    # Check if navigation already exists
-    if 'HOME</a>' in content and ('PREV</a>' in content or 'NEXT</a>' in content):
-        print(f"  Skipping {html_file} (navigation already exists)")
         continue
     
     # Determine prev and next (only among students with HTML)
